@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Operación Escudo PSM</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div><h1>🛡️ Operación Escudo PSM</h1><p>Juego tipo detectives para comprender Seguridad de Procesos</p></div>
+    <div class="timer-card"><span>⏱ Tiempo</span><strong id="timer">30:00</strong><button id="startTimer">Iniciar</button></div>
+  </header>
+  <main>
+    <section class="setup" id="setup">
+      <h2>Configurar equipos</h2><p>Ingresa los nombres de los equipos participantes.</p>
+      <div class="teams-grid"><input id="team1" value="Equipo 1"/><input id="team2" value="Equipo 2"/><input id="team3" value="Equipo 3"/><input id="team4" value="Equipo 4"/></div>
+      <button class="primary" id="startGame">Iniciar juego</button>
+    </section>
+    <section class="game hidden" id="game">
+      <aside class="scoreboard"><h2>🏆 Ranking</h2><div id="scores"></div><button class="secondary" id="resetGame">Reiniciar</button></aside>
+      <section class="board-area">
+        <div class="mission"><h2>🚨 Misión</h2><p>La planta está por arrancar. Existen varias pistas ocultas que podrían generar un evento mayor. Cada equipo debe identificar el elemento PSM correcto y el control necesario.</p></div>
+        <div class="board" id="board"></div>
+        <div class="final-case" id="finalCase"><h2>🔐 Caso final bloqueado</h2><p>Resuelve las 6 zonas para desbloquear el diagnóstico final.</p></div>
+      </section>
+    </section>
+  </main>
+  <div class="modal hidden" id="modal"><div class="modal-content"><button class="close" id="closeModal">×</button><div id="modalBody"></div></div></div>
+  <script src="script.js"></script>
+</body>
+</html>
