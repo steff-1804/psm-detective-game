@@ -1,1 +1,107 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Evita el Evento Mayor | PSM</title><link rel="stylesheet" href="style.css"></head><body><header><div><p class="mini">Juego interactivo PSM</p><h1>🔥 Evita el Evento Mayor</h1><p>Toma decisiones como equipo. Cada elección puede llevar a una operación segura o a un incidente mayor.</p></div><div class="estado"><span>Estado de planta</span><b id="plantStatus">ESTABLE</b><span>Riesgo</span><div class="bar"><i id="riskBar"></i></div><b id="riskValue">20%</b></div></header><main><section id="start" class="card"><h2>🛡️ Operación Escudo PSM</h2><p>La planta va a iniciar una operación crítica. El equipo deberá decidir qué hacer frente a cambios, fugas, desviaciones, trabajos críticos y emergencias.</p><label>Nombre del equipo</label><input id="teamName" value="Equipo Investigador PSM"><label>Modo de juego</label><select id="mode"><option value="normal">Normal: 45 segundos por decisión</option><option value="rapido">Rápido: 20 segundos por decisión</option><option value="sin">Sin cronómetro</option></select><button onclick="startGame()">Iniciar misión</button></section><section id="game" class="game hidden"><aside><div class="panel"><span>Equipo</span><b id="teamLabel"></b></div><div class="panel"><span>Puntaje</span><b id="score">0</b></div><div class="panel"><span>Tiempo</span><b id="timer">--</b></div><div class="panel"><span>Elementos PSM activados</span><div id="activated"></div></div><button class="secondary" onclick="location.reload()">Reiniciar</button></aside><section class="scene"><div class="top"><span id="sceneNumber"></span><span id="sceneTag"></span></div><h2 id="sceneTitle"></h2><p id="sceneStory"></p><div id="visual" class="visual"></div><h3>¿Qué decide el equipo?</h3><div id="options" class="options"></div><div id="feedback" class="feedback hidden"></div><button id="nextBtn" class="hidden" onclick="nextScene()">Siguiente decisión</button></section></section><section id="end" class="card hidden"><h2 id="endTitle"></h2><p id="endMsg"></p><div class="resumen"><div><span>Puntaje final</span><b id="finalScore"></b></div><div><span>Riesgo final</span><b id="finalRisk"></b></div><div><span>Resultado</span><b id="finalStatus"></b></div></div><h3>Aprendizajes clave</h3><ul><li>PSM previene incendios, explosiones, derrames y pérdidas de contención.</li><li>MOC aplica cuando cambia una sustancia, proveedor, equipo, procedimiento o condición.</li><li>PHA/HAZOP responde: ¿qué puede salir mal y cómo lo controlamos?</li><li>Integridad Mecánica evita fallas de equipos críticos.</li><li>Trabajos críticos requieren permisos, controles y autorización.</li><li>ERP define cómo responder ante derrames, incendios o liberaciones químicas.</li></ul><button onclick="location.reload()">Jugar nuevamente</button></section></main><script src="script.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Código Rojo: El Hilo de la Seguridad | PSM</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="game-shell">
+    <header class="leaderboard">
+      <div class="brand">
+        <span class="helmet">🦎</span>
+        <div>
+          <h1>CÓDIGO ROJO</h1>
+          <p>El hilo de la seguridad · Auditoría Forense PSM</p>
+        </div>
+      </div>
+
+      <div class="scores" id="scores"></div>
+
+      <div class="clock">
+        <span>COUNTDOWN</span>
+        <strong id="timer">20:00</strong>
+      </div>
+    </header>
+
+    <section class="screen">
+      <div class="factory-bg">
+        <div class="tower t1"></div>
+        <div class="tower t2"></div>
+        <div class="tower t3"></div>
+        <div class="pipe p1"></div>
+        <div class="pipe p2"></div>
+        <div class="warning-light l1"></div>
+        <div class="warning-light l2"></div>
+      </div>
+
+      <div class="hero-card">
+        <div class="mascot">
+          <div class="face">🦎</div>
+          <div class="helmet-label">PSM</div>
+        </div>
+        <div class="case-info">
+          <p class="case-tag" id="roundTag">CASO SHERWIN · TANQUE 34</p>
+          <h2 id="roundTitle">Código Rojo: El hilo de la seguridad</h2>
+          <p id="roundStory">A las 23:00 h se activó una alarma crítica en Planta Base Solvente. Hubo liberación de vapores inflamables. Su misión: encontrar las fallas PSM antes de que se agote el tiempo.</p>
+        </div>
+      </div>
+
+      <div class="investigation-board">
+        <article class="evidence" id="evidenceA">
+          <h3>🔍 Evidencia A</h3>
+          <div class="document" id="docA"></div>
+        </article>
+
+        <article class="center-panel">
+          <div class="round-number" id="roundNumber">INTRO</div>
+          <div class="countbox">
+            <span>Equipo activo</span>
+            <strong id="activeTeam">Equipo 1</strong>
+          </div>
+          <button class="big-btn" id="startBtn">Iniciar investigación</button>
+          <button class="big-btn hidden" id="nextBtn">Siguiente ronda</button>
+          <div id="feedback" class="feedback hidden"></div>
+        </article>
+
+        <article class="evidence" id="evidenceB">
+          <h3>📑 Evidencia B</h3>
+          <div class="document" id="docB"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="controls">
+      <div class="answer-panel">
+        <h3>¿Qué elemento PSM falló?</h3>
+        <div class="buttons" id="answerButtons"></div>
+      </div>
+
+      <div class="team-actions">
+        <h3>Asignar respuesta</h3>
+        <select id="teamSelect"></select>
+        <button class="correct" id="correctBtn">✅ Correcto +50</button>
+        <button class="partial" id="partialBtn">🟡 Parcial +25</button>
+        <button class="wrong" id="wrongBtn">❌ Incorrecto -10</button>
+      </div>
+
+      <div class="root-cause">
+        <h3>5 Porqués / Causa raíz</h3>
+        <textarea id="rootText" placeholder="El equipo redacta aquí la causa raíz final en 3 líneas..."></textarea>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal hidden" id="finalModal">
+    <div class="modal-content">
+      <h2>🛡️ Dictamen del Comité PSM</h2>
+      <p id="finalText"></p>
+      <div id="finalRanking"></div>
+      <button onclick="location.reload()">Jugar nuevamente</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

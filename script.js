@@ -1,16 +1,230 @@
-const scenes=[
-{title:'Cambio de solvente',tag:'MOC',icon:'📦🧪',story:'Llegó un solvente de un nuevo proveedor. Parece similar, pero nadie revisó SDS, punto de inflamación ni compatibilidad.',opts:[['Usarlo porque parece equivalente.','Ahorra tiempo.',-10,25,'bad',null,'Mala decisión: un cambio químico/proveedor requiere evaluación formal.'],['Activar MOC antes de usarlo.','Revisar SDS, compatibilidad, almacenamiento y EPP.',25,-10,'ok','MOC','Correcto: MOC evita que un cambio pequeño termine en evento mayor.'],['Pedir aprobación verbal.','No queda evaluación técnica.',-5,15,'bad',null,'Insuficiente: PSM requiere aprobación documentada.'],['Guardarlo sin identificar.','Riesgo de confusión.',-15,30,'critical',null,'Crítico: químico sin información clara aumenta el riesgo.']]},
-{title:'Manguera con fisuras',tag:'Integridad Mecánica',icon:'🛢️⚙️',story:'Antes del trasvase se observa una manguera rígida, desgastada y con fisuras. Producción pide iniciar rápido.',opts:[['Continuar y revisar después.','No se detiene la operación.',-20,35,'critical',null,'Crítico: puede generar pérdida de contención e incendio.'],['Detener, reportar y cambiar la manguera.','Control del equipo crítico.',30,-15,'ok','Integridad Mecánica','Correcto: Integridad Mecánica mantiene equipos críticos seguros.'],['Poner cinta temporal.','Solución rápida.',-10,20,'bad',null,'Incorrecto: reparación improvisada no controla el riesgo.'],['Que otro operador decida.','Traslada el problema.',-5,10,'bad',null,'Débil: PSM exige actuar ante señales tempranas.']]},
-{title:'Temperatura fuera de límite',tag:'PHA',icon:'🌡️🔍',story:'La temperatura del tanque sube por encima del límite. Nadie sabe qué ocurriría si continúa aumentando.',opts:[['Analizar causas, consecuencias y controles.','Criterio PHA/HAZOP.',25,-10,'ok','PHA','Correcto: PHA analiza qué puede salir mal y qué barreras existen.'],['Esperar a que baje sola.','No se interviene.',-15,30,'critical',null,'Crítico: ignorar una desviación puede escalar el evento.'],['Abrir el tanque para enfriar.','Libera vapores.',-20,35,'critical',null,'Muy peligroso: puede liberar vapores inflamables.'],['Registrar al final del turno.','Documenta tarde.',-5,15,'bad',null,'Insuficiente: una desviación requiere acción inmediata.']]},
-{title:'Trabajo en caliente',tag:'Trabajos Críticos',icon:'🔥🔧',story:'Un contratista debe soldar cerca del área de solventes. Hay presión porque el trabajo durará solo 20 minutos.',opts:[['Autorizar por experiencia.','Confianza personal.',-10,25,'bad',null,'Incorrecto: la experiencia no reemplaza el permiso.'],['Exigir permiso y controles.','Aislar, medir, retirar inflamables, vigía y extintor.',30,-15,'ok','Trabajos Críticos','Correcto: trabajos críticos requieren permisos y controles.'],['Hacerlo cuando no haya operadores.','Baja exposición de personas.',-15,30,'critical',null,'Crítico: la fuente de ignición sigue presente.'],['Hacerlo al final sin permiso.','Menos gente cerca.',-20,40,'critical',null,'Muy peligroso: trabajo caliente sin permiso cerca de inflamables.']]},
-{title:'Intervención eléctrica',tag:'LOTO',icon:'🔒⚡',story:'Mantenimiento debe intervenir una bomba. Está apagada, pero no se bloqueó la energía ni se verificó energía cero.',opts:[['Trabajar porque está apagada.','Solo se usó botón de paro.',-20,35,'critical',null,'Crítico: apagar no es bloquear.'],['Aplicar LOTO.','Aislar, bloquear, etiquetar y verificar.',30,-15,'ok','LOTO','Correcto: LOTO controla energías peligrosas.'],['Que alguien vigile el botón.','Control débil.',-10,20,'bad',null,'Incorrecto: vigilar no sustituye bloqueo físico.'],['Desconectar rápido.','Terminar antes.',-15,30,'critical',null,'Peligroso: la prisa no controla energía peligrosa.']]},
-{title:'Alarma fuera de servicio',tag:'PSSR / ERP',icon:'🚨📋',story:'Antes de arrancar, una alarma de nivel alto está fuera de servicio. Producción indica que el lote es urgente.',opts:[['Arrancar y mirar visualmente.','Control manual.',-10,25,'bad',null,'Insuficiente: la alarma crítica es una barrera.'],['Realizar revisión previa al arranque.','Evaluar barreras, riesgo residual y autorización.',25,-10,'ok','PSSR','Correcto: PSSR verifica seguridad antes del arranque.'],['Desactivar otras alarmas.','Evitar ruido.',-25,45,'critical',null,'Crítico: quitar barreras incrementa probabilidad de evento mayor.'],['Avisar solo por WhatsApp.','Comunicación informal.',-5,15,'bad',null,'Débil: condición crítica requiere gestión formal.']]},
-{title:'Derrame de solvente',tag:'ERP',icon:'🛢️🚨',story:'Durante el trasvase ocurre un derrame. Hay olor fuerte, tránsito de personas y posibles fuentes de ignición.',opts:[['Limpiar rápido sin aislar.','Continuar operación.',-20,35,'critical',null,'Crítico: primero se aísla y se controla ignición.'],['Activar plan de emergencia.','Aislar, comunicar y usar kit adecuado.',35,-20,'ok','ERP','Correcto: ERP define respuesta ante derrames o incendios.'],['Esperar a que se evapore.','No intervenir.',-25,40,'critical',null,'Muy peligroso: vapores inflamables pueden encenderse.'],['Echar agua sin revisar SDS.','Improvisación.',-10,20,'bad',null,'Incorrecto: la respuesta debe seguir SDS y plan.']]}];
-let current=0,risk=20,score=0,activated=new Set(),timer=null,timeLeft=0,answered=false;const $=id=>document.getElementById(id);
-function startGame(){$('teamLabel').textContent=$('teamName').value||'Equipo PSM';$('start').classList.add('hidden');$('game').classList.remove('hidden');renderScene();}
-function renderScene(){answered=false;const s=scenes[current];$('sceneNumber').textContent=`Escena ${current+1} de ${scenes.length}`;$('sceneTag').textContent=s.tag;$('sceneTitle').textContent=s.title;$('sceneStory').textContent=s.story;$('visual').textContent=s.icon;$('visual').className='visual';$('feedback').classList.add('hidden');$('nextBtn').classList.add('hidden');$('options').innerHTML='';s.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='option';b.innerHTML=`<b>${String.fromCharCode(65+i)}. ${o[0]}</b><small>${o[1]}</small>`;b.onclick=()=>choose(o);$('options').appendChild(b);});setTimer();updateHud();}
-function setTimer(){clearInterval(timer);const mode=$('mode').value;if(mode==='sin'){$('timer').textContent='--';return;}timeLeft=mode==='rapido'?20:45;$('timer').textContent=timeLeft+'s';timer=setInterval(()=>{timeLeft--;$('timer').textContent=timeLeft+'s';if(timeLeft<=0){clearInterval(timer);if(!answered)choose(['Tiempo agotado','',-10,15,'bad',null,'⏱ Tiempo agotado. En PSM la demora ante una condición crítica también aumenta el riesgo.']);}},1000);}
-function choose(o){if(answered)return;answered=true;clearInterval(timer);score+=o[2];risk=Math.max(0,Math.min(100,risk+o[3]));if(o[5])activated.add(o[5]);const fb=$('feedback');fb.className='feedback '+o[4];fb.textContent=o[6];fb.classList.remove('hidden');$('visual').className='visual '+(o[4]==='ok'?'safe':o[4]==='critical'?'alert':'warning');$('nextBtn').classList.remove('hidden');document.querySelectorAll('.option').forEach(b=>b.disabled=true);updateHud();}
-function nextScene(){current++;current>=scenes.length?endGame():renderScene();}
-function updateHud(){$('score').textContent=score;$('riskValue').textContent=risk+'%';$('riskBar').style.width=risk+'%';if(risk<35){$('plantStatus').textContent='ESTABLE';$('plantStatus').style.color='#b8ffd4';}else if(risk<70){$('plantStatus').textContent='ALERTA';$('plantStatus').style.color='#ffe082';}else{$('plantStatus').textContent='CRÍTICO';$('plantStatus').style.color='#ffb4b4';}$('activated').innerHTML=[...activated].map(e=>`<span class="pill">${e}</span>`).join('')||'<p>Aún no se activan elementos.</p>';}
-function endGame(){$('game').classList.add('hidden');$('end').classList.remove('hidden');const safe=risk<50;$('endTitle').textContent=safe?'✅ Planta segura: evento mayor evitado':'💥 Evento mayor: condición crítica';$('endMsg').textContent=safe?'El equipo tomó decisiones preventivas y aplicó controles PSM.':'Varias decisiones aumentaron el riesgo. Esto demuestra por qué PSM debe aplicarse antes de operar.';$('finalScore').textContent=score+' pts';$('finalRisk').textContent=risk+'%';$('finalStatus').textContent=safe?'Seguro':'Crítico';}
+const teams = [
+  {name:"Equipo Rojo", score:0},
+  {name:"Equipo Azul", score:0},
+  {name:"Equipo Verde", score:0},
+  {name:"Equipo Amarillo", score:0}
+];
+
+const rounds = [
+  {
+    number:"INTRO",
+    tag:"ALERTA ROJA",
+    title:"Código Rojo: El hilo de la seguridad",
+    story:"A las 23:00 h se activó una alarma crítica en Planta Base Solvente. Hubo liberación de vapores inflamables en el Tanque 34. Ustedes son el comité de investigación.",
+    a:`<div class="doc-title">REPORTE INICIAL</div>
+       <div class="sketch">🚨</div>
+       <p><b>Ubicación:</b> Planta Base Solvente</p>
+       <p><b>Equipo:</b> Tanque 34</p>
+       <p><b>Evento:</b> Liberación de vapores inflamables</p>`,
+    b:`<div class="doc-title">MISIÓN</div>
+       <p>Analizar las evidencias y determinar qué elementos PSM fallaron.</p>
+       <div class="ok-line">PSI · PHA · MOC · Integridad Mecánica · Trabajos Críticos · ERP</div>`,
+    correct:"PSM",
+    explain:"El caso inicia. Avancen ronda por ronda para descubrir la cadena de fallas."
+  },
+  {
+    number:"RONDA 1",
+    tag:"PSI",
+    title:"La autopsia del documento",
+    story:"Se compara la ficha del proceso con la SDS del solvente usado durante el lote.",
+    a:`<div class="doc-title">FICHA DEL PROCESO · TANQUE 34</div>
+       <div class="sketch">📈🛢️</div>
+       <p><b>Solvente registrado:</b> Tipo A</p>
+       <p><b>Temperatura máxima:</b> 55 °C</p>
+       <p><b>Material línea:</b> Acero al carbono</p>`,
+    b:`<div class="doc-title">SDS NUEVA · SOLVENTE TIPO B</div>
+       <div class="danger-line"><b>Advertencia:</b> Sobre 50 °C aumenta generación de vapores inflamables.</div>
+       <div class="danger-line"><b>Compatibilidad:</b> Evitar contacto prolongado con acero al carbono a temperatura elevada.</div>
+       <p><b>Recomendación:</b> Revisar límites seguros antes de uso.</p>`,
+    correct:"PSI",
+    explain:"Falló PSI: la información de seguridad del proceso no fue actualizada ni usada para validar límites, compatibilidad y condiciones seguras."
+  },
+  {
+    number:"RONDA 2",
+    tag:"PHA / HAZOP",
+    title:"Interrogatorio cruzado",
+    story:"Se revisan declaraciones del operador, técnico y supervisor sobre una alarma crítica.",
+    a:`<div class="doc-title">DECLARACIÓN DEL OPERADOR</div>
+       <p>“La alarma de alta temperatura sonaba falso varias veces. Mantenimiento la puenteó para no detener la producción.”</p>
+       <div class="sketch">👷‍♂️💬</div>`,
+    b:`<div class="doc-title">DECLARACIÓN DEL SUPERVISOR</div>
+       <p>“En el HAZOP esa alarma era nuestra salvaguarda principal para evitar sobrecalentamiento.”</p>
+       <div class="danger-line">Salvaguarda crítica anulada sin análisis.</div>`,
+    correct:"PHA",
+    explain:"Falló PHA/gestión de salvaguardas: una barrera crítica definida en HAZOP fue anulada sin evaluar el riesgo."
+  },
+  {
+    number:"RONDA 3",
+    tag:"MOC",
+    title:"El papelito sospechoso",
+    story:"Se encuentra una orden de trabajo escrita a mano sobre un cambio temporal.",
+    a:`<div class="doc-title">ORDEN DE TRABAJO</div>
+       <p>“Se dañó la bomba original X-350. Se instaló temporalmente una X-200 para arrancar el turno de noche.”</p>
+       <div class="danger-line">Pendiente revisar.</div>`,
+    b:`<div class="doc-title">OBSERVACIÓN TÉCNICA</div>
+       <p>La bomba X-200 tiene menor capacidad y diferente curva de operación.</p>
+       <div class="sketch">🔄⚙️</div>`,
+    correct:"MOC",
+    explain:"Falló MOC: un cambio temporal en equipo puede modificar caudal, presión, control del proceso y riesgo operativo."
+  },
+  {
+    number:"RONDA 4",
+    tag:"INTEGRIDAD MECÁNICA",
+    title:"La evidencia física",
+    story:"La inspección en campo identifica una manguera deteriorada en el circuito de trasvase.",
+    a:`<div class="doc-title">INSPECCIÓN DE CAMPO</div>
+       <div class="sketch">🛢️</div>
+       <p>Manguera rígida con fisuras visibles.</p>
+       <p>Última inspección documentada: hace 18 meses.</p>`,
+    b:`<div class="doc-title">CONDICIÓN CRÍTICA</div>
+       <div class="danger-line">Posible pérdida de contención durante transferencia.</div>
+       <p>Riesgo: derrame + vapores inflamables + fuente de ignición.</p>`,
+    correct:"Integridad Mecánica",
+    explain:"Falló Integridad Mecánica: el equipo crítico no fue inspeccionado ni mantenido oportunamente."
+  },
+  {
+    number:"RONDA 5",
+    tag:"TRABAJOS CRÍTICOS",
+    title:"El contratista y la chispa",
+    story:"El día anterior se realizó una reparación con esmeril cerca del área de solventes.",
+    a:`<div class="doc-title">DECLARACIÓN CONTRATISTA</div>
+       <p>“Era una reparación urgente. Solo fueron 15 minutos de esmerilado.”</p>
+       <div class="sketch">🔥🔧</div>`,
+    b:`<div class="doc-title">BÚSQUEDA DE PERMISO</div>
+       <div class="danger-line">Permiso de trabajo en caliente: NO ENCONTRADO.</div>
+       <p>No hay evidencia de medición de atmósfera ni retiro de inflamables.</p>`,
+    correct:"Trabajos Críticos",
+    explain:"Fallaron Trabajos Críticos y control de contratistas: una fuente de ignición cerca de inflamables requiere permiso, controles y autorización."
+  },
+  {
+    number:"FINAL",
+    tag:"DICTAMEN",
+    title:"El dictamen del comité",
+    story:"Unan las pistas: PSI desactualizado, salvaguarda anulada, cambio sin MOC, manguera deteriorada y trabajo caliente sin permiso.",
+    a:`<div class="doc-title">CADENA DE FALLAS</div>
+       <p>PSI → PHA → MOC → Integridad Mecánica → Trabajos Críticos</p>
+       <div class="sketch">🔗</div>`,
+    b:`<div class="doc-title">PREGUNTA FINAL</div>
+       <p>Redacten la causa raíz en tres líneas usando el formato 5 Porqués.</p>
+       <div class="ok-line">¿Por qué ocurrió? ¿Por qué no se detectó? ¿Qué sistema PSM falló?</div>`,
+    correct:"Causa Raíz",
+    explain:"El incidente no fue causado por una sola persona: fue una cadena de fallas del sistema PSM."
+  }
+];
+
+let current = 0;
+let activeTeam = 0;
+let seconds = 20*60;
+let timer;
+
+const answerList = ["PSI","PHA","MOC","Integridad Mecánica","Trabajos Críticos","ERP","LOTO","Contratistas"];
+
+function init(){
+  renderTeams();
+  renderSelectors();
+  renderRound();
+  document.getElementById("startBtn").onclick = startGame;
+  document.getElementById("nextBtn").onclick = nextRound;
+  document.getElementById("correctBtn").onclick = () => scoreActive(50,"Respuesta correcta y justificada.");
+  document.getElementById("partialBtn").onclick = () => scoreActive(25,"Respuesta parcial. Faltó explicar la consecuencia o el control.");
+  document.getElementById("wrongBtn").onclick = () => scoreActive(-10,"Respuesta incorrecta. Revisen la evidencia.");
+  renderAnswerButtons();
+}
+function renderTeams(){
+  const scores = document.getElementById("scores");
+  scores.innerHTML = "";
+  teams.forEach((t,i)=>{
+    const div = document.createElement("div");
+    div.className = "score-card" + (i===activeTeam ? " active":"");
+    div.innerHTML = `<span>${t.name}</span><strong>${t.score}</strong><div class="bar"><i style="width:${Math.min(100,Math.max(5,t.score/5))}%"></i></div>`;
+    scores.appendChild(div);
+  });
+  document.getElementById("activeTeam").textContent = teams[activeTeam].name;
+}
+function renderSelectors(){
+  const sel = document.getElementById("teamSelect");
+  sel.innerHTML = "";
+  teams.forEach((t,i)=>{
+    const o = document.createElement("option");
+    o.value = i;
+    o.textContent = t.name;
+    sel.appendChild(o);
+  });
+  sel.onchange = () => { activeTeam = Number(sel.value); renderTeams(); };
+}
+function renderAnswerButtons(){
+  const box = document.getElementById("answerButtons");
+  box.innerHTML = "";
+  answerList.forEach(a=>{
+    const btn = document.createElement("button");
+    btn.className = "answer-btn";
+    btn.textContent = a;
+    btn.onclick = () => checkAnswer(a);
+    box.appendChild(btn);
+  });
+}
+function renderRound(){
+  const r = rounds[current];
+  document.getElementById("roundNumber").textContent = r.number;
+  document.getElementById("roundTag").textContent = r.tag;
+  document.getElementById("roundTitle").textContent = r.title;
+  document.getElementById("roundStory").textContent = r.story;
+  document.getElementById("docA").innerHTML = r.a;
+  document.getElementById("docB").innerHTML = r.b;
+  document.getElementById("feedback").classList.add("hidden");
+  document.getElementById("nextBtn").classList.toggle("hidden", current===0);
+  document.getElementById("startBtn").classList.toggle("hidden", current!==0);
+}
+function startGame(){
+  current = 1;
+  renderRound();
+  startTimer();
+}
+function startTimer(){
+  clearInterval(timer);
+  timer = setInterval(()=>{
+    seconds--;
+    const m = String(Math.floor(seconds/60)).padStart(2,"0");
+    const s = String(seconds%60).padStart(2,"0");
+    document.getElementById("timer").textContent = `${m}:${s}`;
+    if(seconds<=0){ clearInterval(timer); finalModal(); }
+  },1000);
+}
+function nextRound(){
+  if(current < rounds.length-1){
+    current++;
+    renderRound();
+  } else {
+    finalModal();
+  }
+}
+function checkAnswer(ans){
+  const r = rounds[current];
+  if(current===0) return;
+  if(ans === r.correct){
+    scoreActive(50,`✅ Correcto: ${r.explain}`);
+  } else {
+    scoreActive(-10,`❌ No es lo principal en esta ronda. Elemento esperado: ${r.correct}. ${r.explain}`);
+  }
+}
+function scoreActive(points,msg){
+  const selected = Number(document.getElementById("teamSelect").value);
+  activeTeam = selected;
+  teams[activeTeam].score += points;
+  const fb = document.getElementById("feedback");
+  fb.textContent = `${teams[activeTeam].name}: ${msg} (${points>0?"+":""}${points} puntos)`;
+  fb.classList.remove("hidden");
+  activeTeam = (activeTeam + 1) % teams.length;
+  document.getElementById("teamSelect").value = activeTeam;
+  renderTeams();
+}
+function finalModal(){
+  clearInterval(timer);
+  const modal = document.getElementById("finalModal");
+  const sorted = [...teams].sort((a,b)=>b.score-a.score);
+  document.getElementById("finalText").textContent =
+    "Causa raíz esperada: El evento ocurrió por una cadena de fallas PSM: PSI desactualizado, salvaguarda crítica anulada sin análisis, cambio temporal sin MOC, deficiencias de integridad mecánica y trabajo caliente sin permiso.";
+  document.getElementById("finalRanking").innerHTML = sorted.map((t,i)=>`<div class="rank-row"><b>${i+1}. ${t.name}</b><span>${t.score} puntos</span></div>`).join("");
+  modal.classList.remove("hidden");
+}
+init();
