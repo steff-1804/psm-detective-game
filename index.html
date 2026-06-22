@@ -1,107 +1,76 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Código Rojo: El Hilo de la Seguridad | PSM</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Código Rojo PSM v2</title>
+<link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div class="game-shell">
-    <header class="leaderboard">
-      <div class="brand">
-        <span class="helmet">🦎</span>
-        <div>
-          <h1>CÓDIGO ROJO</h1>
-          <p>El hilo de la seguridad · Auditoría Forense PSM</p>
-        </div>
-      </div>
-
-      <div class="scores" id="scores"></div>
-
-      <div class="clock">
-        <span>COUNTDOWN</span>
-        <strong id="timer">20:00</strong>
-      </div>
-    </header>
-
-    <section class="screen">
-      <div class="factory-bg">
-        <div class="tower t1"></div>
-        <div class="tower t2"></div>
-        <div class="tower t3"></div>
-        <div class="pipe p1"></div>
-        <div class="pipe p2"></div>
-        <div class="warning-light l1"></div>
-        <div class="warning-light l2"></div>
-      </div>
-
-      <div class="hero-card">
-        <div class="mascot">
-          <div class="face">🦎</div>
-          <div class="helmet-label">PSM</div>
-        </div>
-        <div class="case-info">
-          <p class="case-tag" id="roundTag">CASO SHERWIN · TANQUE 34</p>
-          <h2 id="roundTitle">Código Rojo: El hilo de la seguridad</h2>
-          <p id="roundStory">A las 23:00 h se activó una alarma crítica en Planta Base Solvente. Hubo liberación de vapores inflamables. Su misión: encontrar las fallas PSM antes de que se agote el tiempo.</p>
-        </div>
-      </div>
-
-      <div class="investigation-board">
-        <article class="evidence" id="evidenceA">
-          <h3>🔍 Evidencia A</h3>
-          <div class="document" id="docA"></div>
-        </article>
-
-        <article class="center-panel">
-          <div class="round-number" id="roundNumber">INTRO</div>
-          <div class="countbox">
-            <span>Equipo activo</span>
-            <strong id="activeTeam">Equipo 1</strong>
-          </div>
-          <button class="big-btn" id="startBtn">Iniciar investigación</button>
-          <button class="big-btn hidden" id="nextBtn">Siguiente ronda</button>
-          <div id="feedback" class="feedback hidden"></div>
-        </article>
-
-        <article class="evidence" id="evidenceB">
-          <h3>📑 Evidencia B</h3>
-          <div class="document" id="docB"></div>
-        </article>
-      </div>
-    </section>
-
-    <section class="controls">
-      <div class="answer-panel">
-        <h3>¿Qué elemento PSM falló?</h3>
-        <div class="buttons" id="answerButtons"></div>
-      </div>
-
-      <div class="team-actions">
-        <h3>Asignar respuesta</h3>
-        <select id="teamSelect"></select>
-        <button class="correct" id="correctBtn">✅ Correcto +50</button>
-        <button class="partial" id="partialBtn">🟡 Parcial +25</button>
-        <button class="wrong" id="wrongBtn">❌ Incorrecto -10</button>
-      </div>
-
-      <div class="root-cause">
-        <h3>5 Porqués / Causa raíz</h3>
-        <textarea id="rootText" placeholder="El equipo redacta aquí la causa raíz final en 3 líneas..."></textarea>
-      </div>
-    </section>
+<div class="app">
+<header class="topbar">
+  <div class="title">
+    <div class="alarm">🚨</div>
+    <div><h1>CÓDIGO <span>ROJO</span></h1><p>El hilo de la seguridad · Auditoría Forense PSM</p></div>
   </div>
+  <div id="scoreStrip" class="score-strip"></div>
+  <div class="total"><small>TIEMPO TOTAL DEL JUEGO</small><strong id="gameClock">00:00</strong></div>
+</header>
 
-  <div class="modal hidden" id="finalModal">
-    <div class="modal-content">
-      <h2>🛡️ Dictamen del Comité PSM</h2>
-      <p id="finalText"></p>
-      <div id="finalRanking"></div>
-      <button onclick="location.reload()">Jugar nuevamente</button>
+<section class="hero">
+  <div class="mascot-card"><div class="mascot-ring"><div class="helmet">PSM</div><div class="mascot">🦎</div></div></div>
+  <div class="alert-card">
+    <h2>🚨 ALERTA ROJA</h2>
+    <p>Tiempo para responder:</p>
+    <div id="roundTimer" class="round-timer">01:00</div>
+    <button id="startRoundBtn" class="red-btn">▶ INICIAR TIEMPO</button>
+    <button id="skipTeamBtn" class="outline-btn">↪ PASAR AL SIGUIENTE EQUIPO</button>
+    <small>Al finalizar el tiempo se continuará con el siguiente equipo automáticamente.</small>
+  </div>
+  <div class="plant-card">
+    <div class="tower t1"></div><div class="tower t2"></div><div class="tower t3"></div>
+    <div class="pipe"></div><div class="light l1"></div><div class="light l2"></div><div class="tape"></div>
+  </div>
+</section>
+
+<nav class="round-nav">
+  <div>🎯 RONDA ACTUAL: <b id="roundIndicator">1 de 6</b></div>
+  <div id="roundDots" class="round-dots"></div>
+  <div class="navs"><button id="prevRoundBtn" class="blue-btn">‹ RONDA ANTERIOR</button><button id="nextRoundBtn" class="green-btn">SIGUIENTE RONDA ›</button></div>
+</nav>
+
+<main class="grid">
+  <section class="panel redline"><div class="panel-title">🔍 EVIDENCIA A</div><div id="evidenceA" class="content"></div></section>
+  <section class="panel"><div class="panel-title">🧾 TU RESPUESTA</div>
+    <div class="content">
+      <label>Selecciona la opción que consideres correcta:</label>
+      <select id="answerSelect"></select>
+      <div class="points-actions"><button id="correctBtn" class="correct">✓ Correcto +50</button><button id="partialBtn" class="partial">● Parcial +25</button><button id="wrongBtn" class="wrong">✕ Incorrecto -10</button></div>
+      <textarea id="justification" placeholder="Justifica brevemente la respuesta del equipo aquí..."></textarea>
+      <div class="points">Puntos por esta respuesta: <b id="lastPoints">0</b></div>
+      <div id="feedback" class="feedback hidden"></div>
     </div>
-  </div>
+  </section>
+  <section class="panel redline"><div class="panel-title">🎯 MISIÓN</div><div id="mission" class="content"></div></section>
+</main>
 
-  <script src="script.js"></script>
+<footer class="bottom">
+  <button id="resetBtn" class="blue-btn">↻ REINICIAR JUEGO</button>
+  <button id="viewScoresBtn" class="yellow-btn">🏆 VER PUNTAJES</button>
+  <button id="finishBtn" class="red-btn">⚑ FINALIZAR JUEGO</button>
+</footer>
+</div>
+
+<div id="winnerModal" class="modal hidden">
+  <div class="modal-box">
+    <button id="closeModal" class="close">×</button>
+    <div class="trophy">🏆</div>
+    <h2 id="winnerTitle"></h2>
+    <p id="winnerText"></p>
+    <div id="rankingList"></div>
+    <button id="playAgainBtn" class="green-btn">Jugar nuevamente</button>
+  </div>
+</div>
+<script src="script.js"></script>
 </body>
 </html>
